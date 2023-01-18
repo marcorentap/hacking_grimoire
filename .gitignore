@@ -1,2 +1,5 @@
-__pycache__/
 .*
+*.gpr
+*.rep/
+peda*
+__pycache__/
