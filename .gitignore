@@ -1,5 +1,6 @@
 .*
 *.gpr
+*.lock*
 *.rep/
 peda*
 __pycache__/
