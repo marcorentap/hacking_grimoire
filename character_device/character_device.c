@@ -2,25 +2,24 @@
 #include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/cdev.h>
+#include <linux/tty.h>
 
 #define DEVICE_NAME "my_chrdev"
-#define IOCTL_LOGIN _IO('m', 1)
+#define IOCTL_SET_USER _IO('m', 1)
 
 dev_t mod_dev;
 struct cdev mod_cdev;
 struct class* mod_class;
 
-typedef struct msg {
-    char name[256];
-    char buf[256];
-};
+char messages[10][1024];
 
+char current_author[256];
 static long mod_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch (cmd) {
-        case IOCTL_LOGIN:
-            printk(KERN_INFO "Received IOCTL_LOGIN\n");
-            // do something here
+        case IOCTL_SET_USER:
+            copy_from_user(current_author, arg, sizeof(current_author));
+            pr_info("user set to %s", current_author);
             break;
         default:
             return -ENOTTY;
@@ -38,12 +37,22 @@ static int mod_release(struct inode *inode, struct file *file) {
   return 0;
 }
 
+static ssize_t mod_read(struct file *filep, char *buffer, size_t len, loff_t *offset) {
+    pr_info("User read!");
+    return 0;
+}
+
+static ssize_t mod_write(struct file *filep, const char *buffer, size_t len, loff_t *offset) {
+    pr_info("User wrote!");
+    return 0;
+}
+
 static const struct file_operations mod_fops = {
     .owner = THIS_MODULE,
     .open = mod_open,
     .release = mod_release,
-    //.read = mod_read,
-    //.write = mod_write,
+    .read = mod_read,
+    .write = mod_write,
     .unlocked_ioctl = mod_ioctl,
 };
 

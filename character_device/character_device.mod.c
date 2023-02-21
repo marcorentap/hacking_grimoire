@@ -37,6 +37,7 @@ __used __section("__versions") = {
 	{ 0x6a0a71c7, "cdev_add" },
 	{ 0x320c3a3f, "cdev_init" },
 	{ 0xe3ec2f2b, "alloc_chrdev_region" },
+	{ 0x13c49cc2, "_copy_from_user" },
 	{ 0x5b8239ca, "__x86_return_thunk" },
 	{ 0x92997ed8, "_printk" },
 	{ 0xbdfb6dbb, "__fentry__" },
@@ -45,4 +46,4 @@ __used __section("__versions") = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "B4F63146674AAC928216375");
+MODULE_INFO(srcversion, "6707D2FE34AA2A682DED99D");
