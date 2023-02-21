@@ -28,7 +28,7 @@ void retrieve_messages() {
     // Receive 10 messages
     char buffer[10 * 1024];
     read(fd, buffer, 10 * 1024);
-    printf("Received %s\n", buffer);
+    printf("Received messages: \n%s\n", buffer);
 
     close(fd);
 }
@@ -47,8 +47,6 @@ void send_message() {
     if (ioctl(fd, IOCTL_SET_USER, username) < 0) {
         printf("ioctl failed\n");
         return -1;
-    } else {
-        printf("Set user to %s\n", username);
     }
 
     write(fd, msg_buffer, 1024);
@@ -58,6 +56,7 @@ void send_message() {
 
 int main()
 {
+    system("clear");
     printf("Enter username: ");
     fgets(username, 256, stdin);
     username[strcspn(username, "\n")] = 0;
@@ -83,6 +82,11 @@ int main()
                 printf("Invalid option\n");
                 continue;
         }
+
+        printf("\nEnter to continue...");
+        fgets(buffer, 8, stdin);
+        system("clear");
     }
+
     return 0;
 }

@@ -40,14 +40,18 @@ static int mod_release(struct inode *inode, struct file *file) {
 }
 
 static ssize_t mod_read(struct file *filep, char *buffer, size_t len, loff_t *offset) {
-    copy_to_user(buffer, messages, message_count * 2048);
+    if (messages != NULL) {
+        pr_info("Sent %d byte message: %s", strlen(messages), messages);
+        copy_to_user(buffer, messages, strlen(messages));
+    }
     return 0;
 }
 
 static ssize_t mod_write(struct file *filep, const char *buffer, size_t len, loff_t *offset) {
     // Grow the messages
     message_count++;
-    char *temp = kmalloc(1024 * message_count, GFP_KERNEL);
+    char *temp;
+    temp = kmalloc((1024 + 256) * message_count, GFP_KERNEL);
 
     if (messages != NULL) {
         strcpy(temp, messages);
@@ -57,10 +61,16 @@ static ssize_t mod_write(struct file *filep, const char *buffer, size_t len, lof
     messages = temp;
     
     // Add new message to the messages
-    char message[1024];
-    copy_from_user(message, buffer, len);
+    char message[1024 + 256];
+    sprintf(message, "[%s] ", current_author);
+
+    char message_buffer[1024];
+    copy_from_user(message_buffer, buffer, len);
+
+    strcat(message, message_buffer);
     strcat(messages, message);
-    pr_info("Received [%s] %s", current_author, message);
+
+    pr_info("Received %s", message);
     return 0;
 }
 
