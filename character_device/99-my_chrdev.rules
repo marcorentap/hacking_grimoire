@@ -1,0 +1,1 @@
+KERNEL=="my_chrdev", SUBSYSTEM=="mod_class", MODE="0666"
