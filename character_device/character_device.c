@@ -15,7 +15,7 @@ struct class* mod_class;
 char *messages = NULL;
 int message_count = 0;
 
-char current_author[256];
+char current_author[128];
 static long mod_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch (cmd) {
@@ -40,7 +40,7 @@ static int mod_release(struct inode *inode, struct file *file) {
 }
 
 static ssize_t mod_read(struct file *filep, char *buffer, size_t len, loff_t *offset) {
-    copy_to_user(buffer, messages, len);
+    copy_to_user(buffer, messages, message_count * 2048);
     return 0;
 }
 

@@ -26,8 +26,9 @@ void retrieve_messages() {
     }
     
     // Receive 10 messages
-    char* buffer[10 * 1024];
+    char buffer[10 * 1024];
     read(fd, buffer, 10 * 1024);
+    printf("Received %s\n", buffer);
 
     close(fd);
 }
