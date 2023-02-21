@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define IOCTL_LOGIN  _IO('m', 1)
+#define IOCTL_SET_USER  _IO('m', 1)
 char username[256];
 
 void print_menu() {
@@ -13,32 +13,44 @@ void print_menu() {
         "Select an option: \n"
         "1. Retrieve messages\n"
         "2. Send a message\n"
-        "3. Exit"
+        "3. Exit\n"
     );
 }
 
 void retrieve_messages() {
-    printf("received something woohoo");
+    int fd = open("/dev/my_chrdev", O_RDWR);
+
+    if (fd < 0) {
+        perror("Failed to open device file");
+        return  1;
+    }
+    
+    // Receive 10 messages
+    char* buffer[10 * 1024];
+    read(fd, buffer, 10 * 1024);
+
+    close(fd);
 }
 
-void send_message(int fd) {
+void send_message() {
     char msg_buffer[1024];
-    print("Enter your message: ");
+    printf("Enter your message: \n");
     fgets(msg_buffer, 1024, stdin);
 
     int fd = open("/dev/my_chrdev", O_RDWR);
     if (fd < 0) {
         perror("Failed to open device file");
-        return -1;
+        return  1;
     }
 
     if (ioctl(fd, IOCTL_SET_USER, username) < 0) {
-        printf("ioctl failed");
+        printf("ioctl failed\n");
         return -1;
     } else {
         printf("Set user to %s\n", username);
     }
-    fprintf(fd, msg_buffer);
+
+    write(fd, msg_buffer, 1024);
 
     close(fd);
 }
@@ -46,25 +58,30 @@ void send_message(int fd) {
 int main()
 {
     printf("Enter username: ");
-    fscanf(stdin, "%s", username);
+    fgets(username, 256, stdin);
+    username[strcspn(username, "\n")] = 0;
 
-    
-    int opt;
-    fscanf(stdin, "%d", opt);
+    while(1) {
+        print_menu();
+        int opt;
+        char buffer[8];
+        fgets(buffer, 8, stdin);
+        opt = atoi(buffer);
 
-    switch (opt) {
-        case 1:
-            retrieve_message();
-            break;
-        case 2:
-            send_message();
-            break;
-        case 3:
-            exit(1);
-            break;
-        default:
-            printf("Invalid option\n");
-            continue;
+        switch (opt) {
+            case 1:
+                retrieve_messages();
+                break;
+            case 2:
+                send_message();
+                break;
+            case 3:
+                exit(1);
+                break;
+            default:
+                printf("Invalid option\n");
+                continue;
+        }
     }
     return 0;
 }

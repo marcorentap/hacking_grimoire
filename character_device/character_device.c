@@ -3,6 +3,7 @@
 #include <linux/uaccess.h>
 #include <linux/cdev.h>
 #include <linux/tty.h>
+#include <linux/slab.h>
 
 #define DEVICE_NAME "my_chrdev"
 #define IOCTL_SET_USER _IO('m', 1)
@@ -11,7 +12,8 @@ dev_t mod_dev;
 struct cdev mod_cdev;
 struct class* mod_class;
 
-char messages[10][1024];
+char *messages = NULL;
+int message_count = 0;
 
 char current_author[256];
 static long mod_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
@@ -38,12 +40,27 @@ static int mod_release(struct inode *inode, struct file *file) {
 }
 
 static ssize_t mod_read(struct file *filep, char *buffer, size_t len, loff_t *offset) {
-    pr_info("User read!");
+    copy_to_user(buffer, messages, len);
     return 0;
 }
 
 static ssize_t mod_write(struct file *filep, const char *buffer, size_t len, loff_t *offset) {
-    pr_info("User wrote!");
+    // Grow the messages
+    message_count++;
+    char *temp = kmalloc(1024 * message_count, GFP_KERNEL);
+
+    if (messages != NULL) {
+        strcpy(temp, messages);
+        kfree(messages);
+    }
+
+    messages = temp;
+    
+    // Add new message to the messages
+    char message[1024];
+    copy_from_user(message, buffer, len);
+    strcat(messages, message);
+    pr_info("Received [%s] %s", current_author, message);
     return 0;
 }
 
