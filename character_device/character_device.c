@@ -4,17 +4,22 @@
 #include <linux/cdev.h>
 
 #define DEVICE_NAME "my_chrdev"
-#define MY_IOCTL_CMD  _IO('m', 1)
+#define IOCTL_LOGIN _IO('m', 1)
 
 dev_t mod_dev;
 struct cdev mod_cdev;
 struct class* mod_class;
 
-static long mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+typedef struct msg {
+    char name[256];
+    char buf[256];
+};
+
+static long mod_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch (cmd) {
-        case MY_IOCTL_CMD:
-            printk(KERN_INFO "Received MY_IOCTL_CMD\n");
+        case IOCTL_LOGIN:
+            printk(KERN_INFO "Received IOCTL_LOGIN\n");
             // do something here
             break;
         default:
